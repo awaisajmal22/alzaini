@@ -27,6 +27,7 @@ class _SalesInvoicePageState extends State<SalesInvoicePage> {
 
   TextEditingController _qtyController = new TextEditingController();
   TextEditingController _subtotalController = new TextEditingController();
+  TextEditingController _salesPriceController = TextEditingController();
 
   List<VanSalesInvoiceDetailsItem> _vanSalesInvoiceDetailsList = [];
 
@@ -61,30 +62,32 @@ class _SalesInvoicePageState extends State<SalesInvoicePage> {
               onPressed: () async {
                 String _barcodeScanRes = '';
                 TextEditingController controller = new TextEditingController();
-                showDialog(context: context, builder: (context) => AlertDialog(
-                  title: Text('Enter the barcode'),
-                  content: TextFormField(
-                    controller: controller,
-                  ),
-                  actions: [
-                    ElevatedButton(
-                      child: Text('OK'),
-                      onPressed: () {
-                        if(controller.text.isNotEmpty){
-                          Navigator.of(context).pop();
-                          _barcodeScanRes = controller.text;
-                          vanItemDetails(_barcodeScanRes);
-                        }
-                      },
-                    ),
-                    ElevatedButton(
-                      child: Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ));
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: Text('Enter the barcode'),
+                          content: TextFormField(
+                            controller: controller,
+                          ),
+                          actions: [
+                            ElevatedButton(
+                              child: Text('OK'),
+                              onPressed: () {
+                                if (controller.text.isNotEmpty) {
+                                  Navigator.of(context).pop();
+                                  _barcodeScanRes = controller.text;
+                                  vanItemDetails(_barcodeScanRes);
+                                }
+                              },
+                            ),
+                            ElevatedButton(
+                              child: Text('Cancel'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ));
               }),
         ],
       ),
@@ -183,11 +186,14 @@ class _SalesInvoicePageState extends State<SalesInvoicePage> {
     var vanServices = VanServices();
     VanItemDetailsAPIResponse response = await vanServices.VanItemDetails(
         locationId: locationId, barcode: barcodeScanRes);
+    // var data = VanItemDetails.fromJson(dummyJson);
+    // _scannedItemCard(data);
     if (response != null) {
       if (response.data != null) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(response.data.toString())));
         _scannedItem = VanItemDetails.fromJson(response.data);
+        print(_scannedItem);
         _scannedItemCard(_scannedItem);
         // setState(() {
         //   showItem = true;
@@ -205,9 +211,9 @@ class _SalesInvoicePageState extends State<SalesInvoicePage> {
     // ScaffoldMessenger.of(context)
     //     .showSnackBar(SnackBar(content: Text(message)));
     Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
     );
   }
 
@@ -215,108 +221,87 @@ class _SalesInvoicePageState extends State<SalesInvoicePage> {
     double maxQty = double.parse(itemDetails.QtyOnHand);
     double salesPrice = double.parse(itemDetails.SalesPrice);
     _qtyController.text = '1';
+    _salesPriceController.text = itemDetails.SalesPrice;
     _subtotalController.text = itemDetails.SalesPrice;
+    // _subtotalController.text = _salesPriceController.text;
     showModalBottomSheet(
         context: context,
         isDismissible: false,
         enableDrag: false,
         builder: (context) {
-          return Container(
-            padding: EdgeInsets.all(20),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text('Item ID: '),
-                      Text(
-                        itemDetails.ItemID.toString(),
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Text('Unit ID: '),
-                      Text(
-                        itemDetails.UnitID.toString(),
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Item Name: '),
-                      Expanded(
-                        child: Container(
-                          color: Colors.yellow,
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              padding: EdgeInsets.all(20),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text('Item ID: '),
+                        Text(
+                          itemDetails.ItemID.toString(),
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Text('Unit ID: '),
+                        Text(
+                          itemDetails.UnitID.toString(),
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Item Name: '),
+                        Expanded(
+                          child: Container(
+                            color: Colors.yellow,
+                            child: Text(
+                              itemDetails.ItemName,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('ItemTypeName: '),
+                        Expanded(
                           child: Text(
-                            itemDetails.ItemName,
+                            itemDetails.ItemTypeName,
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('ItemTypeName: '),
-                      Expanded(
-                        child: Text(
-                          itemDetails.ItemTypeName,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Text('SalesPrice: '),
-                      Text(
-                        itemDetails.SalesPrice,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Text('QtyOnHand: '),
-                      Text(
-                        itemDetails.QtyOnHand,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Text('UnitName: '),
-                      Text(
-                        itemDetails.UnitName,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  SizedBox(
-                    height: 50,
-                    child: Row(
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Row(
                       children: [
-                        Expanded(flex: 1, child: Text('How Many Items: ')),
+                        Expanded(child: Text('SalesPrice: ')),
+                        // Text(
+                        //   itemDetails.SalesPrice,
+                        //   style: TextStyle(fontWeight: FontWeight.bold),
+                        // ),
+
                         Expanded(
                           child: TextFormField(
-                            controller: _qtyController,
+                            controller: _salesPriceController,
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
-                            keyboardType: TextInputType.numberWithOptions(signed: false, decimal: false),
+                            // keyboardType: TextInputType.numberWithOptions(
+                            //     signed: false, decimal: false),
                             decoration: InputDecoration(
                               fillColor: Colors.blue[100],
                               filled: true,
@@ -331,98 +316,167 @@ class _SalesInvoicePageState extends State<SalesInvoicePage> {
                               focusedBorder: InputBorder.none,
                               disabledBorder: InputBorder.none,
                             ),
-                            validator: (arg) {
-                              if (arg != null && arg.isNotEmpty) {
-                                if(arg == '.' || arg.contains(',')){
-                                  arg = '0';
-                                }
-                                double arg_double = double.parse(arg);
-                                if (maxQty >= arg_double) {
+                            // validator: (arg) {
+                            //   double data = double.parse(arg);
+                            //   if (salesPrice != data) {
+                            //     print(data);
 
-                                  print("maxQty");
-                                  print(maxQty);
-                                  print("maxQty");
+                            //     _salesPriceController.text = (data).toString();
 
-                                  _subtotalController.text =
-                                      (arg_double * salesPrice).toString();
-
-                                  return null;
-                                }else{
-                                  return 'Not Available';
-                                }
+                            //     return null;
+                            //   } else {
+                            //     return 'Price is less than old price';
+                            //   }
+                            // },
+                            onFieldSubmitted: (arg) {
+                              double data = double.parse(arg);
+                              if (salesPrice != data) {
+                                _salesPriceController.text = (data).toString();
+                                _subtotalController.text = (data).toString();
+                                //  _salesPrice = (data).toString();
+                                return null;
                               }
-                              return null;
-                            },
-                            onFieldSubmitted: (arg){
-                              if(arg != '.' || arg.contains(',')){
-                                print(arg);
-                                double arg_double =
-                                double.parse(arg);
-                                if (maxQty >= arg_double) {
-                                  _subtotalController.text =
-                                      (arg_double * salesPrice).toString();
-                                  return null;
-                                }
-                              }
-
                             },
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Text(
-                        'Subtotal Price: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Flexible(
-                        child: TextFormField(
-                          controller: _subtotalController,
-                          keyboardType: TextInputType.number,
-                          enabled: false,
-                          decoration: InputDecoration(
-                              fillColor: Colors.grey, filled: true),
+                    SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Text('QtyOnHand: '),
+                        Text(
+                          itemDetails.QtyOnHand,
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Text('UnitName: '),
+                        Text(
+                          itemDetails.UnitName,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    SizedBox(
+                      height: 50,
+                      child: Row(
+                        children: [
+                          Expanded(flex: 1, child: Text('How Many Items: ')),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _qtyController,
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              keyboardType: TextInputType.numberWithOptions(
+                                  signed: false, decimal: false),
+                              decoration: InputDecoration(
+                                fillColor: Colors.blue[100],
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: const BorderRadius.all(
+                                    const Radius.circular(20.0),
+                                  ),
+                                ),
+                                enabledBorder: InputBorder.none,
+                                focusedErrorBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                              ),
+                              validator: (arg) {
+                                if (arg != null && arg.isNotEmpty) {
+                                  if (arg == '.' || arg.contains(',')) {
+                                    arg = '0';
+                                  }
+                                  double arg_double = double.parse(arg);
+                                  if (maxQty >= arg_double) {
+                                    print("maxQty");
+                                    print(maxQty);
+                                    print("maxQty");
+
+                                    _subtotalController.text = (arg_double *
+                                            double.parse(
+                                                _salesPriceController.text))
+                                        .toString();
+                                    return null;
+                                  } else {
+                                    return 'Not Available';
+                                  }
+                                }
+                                return null;
+                              },
+                              onFieldSubmitted: (arg) {
+                                if (arg != '.' || arg.contains(',')) {
+                                  print(arg);
+                                  double arg_double = double.parse(arg);
+                                  if (maxQty >= arg_double) {
+                                    _subtotalController.text = (arg_double *
+                                            double.parse(
+                                                _salesPriceController.text))
+                                        .toString();
+                                    return null;
+                                  }
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Center(
-                      child: _addtoListButton(
-                          context, 'Add to List', itemDetails))
-                ],
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Text(
+                          'Subtotal Price: ',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Flexible(
+                          child: TextFormField(
+                            controller: _subtotalController,
+                            keyboardType: TextInputType.number,
+                            enabled: false,
+                            decoration: InputDecoration(
+                                fillColor: Colors.grey, filled: true),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Center(
+                        child: _addtoListButton(
+                            context, 'Add to List', itemDetails))
+                  ],
+                ),
               ),
             ),
           );
         });
   }
 
-
   InkWell _addtoListButton(
       BuildContext context, String s, VanItemDetails itemDetails) {
     return InkWell(
       onTap: () async {
+        print(_salesPriceController.text);
+        print(_subtotalController.text);
         double demand = 0;
-        if(_qtyController.text == '.'){
+        if (_qtyController.text == '.') {
           _showMsg('Select proper quantity');
-        }
-        else if(_qtyController.text == '0'){
+        } else if (_qtyController.text == '0') {
           _showMsg('Select at least one.');
-        }
-        else if (_qtyController.text.contains(',')){
+        } else if (_qtyController.text.contains(',')) {
           _showMsg('Remove comma.');
-        }
-        else if (_qtyController.text.isEmpty){
+        } else if (_qtyController.text.isEmpty) {
           _showMsg('Select proper quantity');
-        }
-        else if (double.parse(_qtyController.text) > 0 ){
+        } else if (double.parse(_qtyController.text) > 0) {
           demand = double.parse(_qtyController.text);
-          if (double.parse(itemDetails.QtyOnHand) >= demand){
-
-            double actualPrice = double.parse(itemDetails.SalesPrice) *
+          if (double.parse(itemDetails.QtyOnHand) >= demand) {
+            double actualPrice = double.parse(_salesPriceController.text) *
                 int.parse(_qtyController.text);
 
             VanSalesInvoiceDetailsItem model = new VanSalesInvoiceDetailsItem(
@@ -431,7 +485,9 @@ class _SalesInvoicePageState extends State<SalesInvoicePage> {
                 UnitID: itemDetails.UnitID,
                 InvoiceQty: int.parse(_qtyController.text),
                 FreeQty: 5,
-                UnitPrice: double.parse(itemDetails.SalesPrice),
+                UnitPrice: double.parse(
+                    // itemDetails.SalesPrice
+                    _salesPriceController.text),
                 ActualPrice: actualPrice,
                 UnitName: itemDetails.UnitName);
 
@@ -441,9 +497,10 @@ class _SalesInvoicePageState extends State<SalesInvoicePage> {
                 if (_vanSalesInvoiceDetailsList[i].ItemID == model.ItemID &&
                     _vanSalesInvoiceDetailsList[i].UnitID == model.UnitID) {
                   _vanSalesInvoiceDetailsList[i].InvoiceQty =
-                      _vanSalesInvoiceDetailsList[i].InvoiceQty + model.InvoiceQty;
-                  double actualPricee =
-                      model.UnitPrice * _vanSalesInvoiceDetailsList[i].InvoiceQty;
+                      _vanSalesInvoiceDetailsList[i].InvoiceQty +
+                          model.InvoiceQty;
+                  double actualPricee = model.UnitPrice *
+                      _vanSalesInvoiceDetailsList[i].InvoiceQty;
 
                   _vanSalesInvoiceDetailsList[i].ActualPrice = actualPricee;
                   notAdded = false;
@@ -458,17 +515,10 @@ class _SalesInvoicePageState extends State<SalesInvoicePage> {
 
             setState(() {});
             Navigator.pop(context);
-
-          }
-          else{
+          } else {
             _showMsg('Out of Stock');
           }
         }
-
-
-
-
-
       },
       child: Container(
         padding: EdgeInsets.symmetric(

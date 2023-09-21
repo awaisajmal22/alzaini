@@ -23,8 +23,18 @@ class VanItemDetails {
 
   // VanItemDetails.fromJson(Map<String, dynamic> map) => $_VanItemDetailsFromJson(map);
 
-  factory VanItemDetails.fromJson(Map<String, dynamic> map) => _$VanItemDetailsFromJson(map);
+  factory VanItemDetails.fromJson(Map<String, dynamic> map) =>
+      _$VanItemDetailsFromJson(map);
 
   Map<String, dynamic> toJson() => _$VanItemDetailsToJson(this);
-
 }
+
+var dummyJson = {
+  "ItemID": 2235,
+  "UnitID": 30,
+  "ItemName": "Cooking",
+  "ItemTypeName": "Finished Product",
+  "SalesPrice": "38.0",
+  "QtyOnHand": "9.00",
+  "UnitName": "BDLS",
+};
